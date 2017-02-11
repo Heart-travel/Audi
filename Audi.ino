@@ -19,6 +19,13 @@ void setup() {
   Serial.println("Waiting for the event");
 }
 
+void sim900_flush_serial(){
+  while (AudiSerial.available()) {
+    AudiSerial.read();
+  }
+  Serial.println("");
+}
+
 void loop() { // run over and over
 
   lastState = state;
@@ -26,6 +33,7 @@ void loop() { // run over and over
   
   if ( state != lastState ) {
     Serial.println("Event is triggered");
+#if 0
     AudiSerial.write("AT+CMGF=1\r\n");
     delay(2000);
     AudiSerial.write("AT+CMGS=\"xxxxxxxxxx\"\r\n");
@@ -33,7 +41,18 @@ void loop() { // run over and over
     AudiSerial.write("Switch was turned ");
     AudiSerial.write(state ? "on" : "off");
     AudiSerial.write(0x1A);
+    Serial.println(AudiSerial.read());
     Serial.println("Finish to sent message");
+#endif
+    sim900_flush_serial();
+    delay(2000);
+    if (state) {
+      Serial.println("Start to dial a number");
+      AudiSerial.write("ATDxxxxxxxxxxx;\r\n");
+    }
+  }
+  while (AudiSerial.available()) {
+    Serial.println(AudiSerial.read());
   }
 
   delay(1000);
